@@ -4,7 +4,7 @@ import { employeesTable } from '../hr/employees';
 
 export const payslipsTable = sqliteTable('payslips', {
     id: text('id').primaryKey(),
-    employeeID: text('employee_id').references(() => employeesTable.id),
+    employeeID: text('employee_id').references(() => employeesTable.id, { onDelete: "cascade" }).notNull(),
     periodStart: text('period_start').$defaultFn(() => new Date().toISOString()).notNull(),
     periodEnd: text('period_end').$defaultFn(() => new Date().toISOString()).notNull(),
     paymentDate: text('payment_date').$defaultFn(() => new Date().toISOString()).notNull(),

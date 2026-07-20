@@ -4,7 +4,7 @@ import { employeesTable } from '../hr/employees';
 
 export const timesheetsTable = sqliteTable('timesheets', {
     id: text('id').primaryKey(),
-    employeeID: text('employee_id').references(() => employeesTable.id).notNull(),
+    employeeID: text('employee_id').references(() => employeesTable.id, { onDelete: "cascade" }).notNull(),
     periodStart: text('period_start').$defaultFn(() => new Date().toISOString()),
     periodEnd: text('period_end').$defaultFn(() => new Date().toISOString()),
     hoursWorked: numeric('hours_worked').notNull(),

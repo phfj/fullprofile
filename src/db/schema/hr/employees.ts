@@ -12,7 +12,7 @@ export enum Staff_Role {
 
 export const employeesTable = sqliteTable('employees', {
     id: text('id').primaryKey(),
-    userId: text('user_id').references(() => usersTable.id),
+    userId: text('user_id').references(() => usersTable.id, { onDelete: "cascade" }),
     firstName: text('first_name').notNull(),
     lastName: text('last_name'),
     email: text('email').notNull(),

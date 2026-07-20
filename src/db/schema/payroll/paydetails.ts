@@ -26,7 +26,7 @@ export enum DESCRIPTION {
 
 export const paydetailsTable = sqliteTable('paydetails', {
     id: text('id').primaryKey(),
-    payslipId: text('payslip_id').references(() => payslipsTable.id),
+    payslipId: text('payslip_id').references(() => payslipsTable.id, { onDelete: "cascade" }).notNull(),
     lineType: text('line_type').$type<'earning' | 'deduction'>().notNull(),
     description: text('description').$type<DESCRIPTION>().notNull(),
     amount: centsCurrency('amount').notNull()
