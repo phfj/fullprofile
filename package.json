@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:api": "tsx watch src/index.ts",
+    "start:api": "tsx src/index.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "node scripts/deploy.js"
   },
   "dependencies": {
     "@libsql/client": "^0.17.4",

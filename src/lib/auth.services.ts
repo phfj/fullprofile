@@ -1,12 +1,13 @@
+'use server' //tells next.js that this file will be executed on the server (in Node.js runtime), not in the browser
+
 //sqlite auth-service logic
 import crypto from 'crypto';
-import { db } from '../db/schema';  //Your Drizzle SQLite instance
+import { db } from '../db/schema';  //Your Drizzle SQLite instance (automatically resolves to '../db/schema/index.ts)
 import { usersTable, sessionsTable, NewUser } from '../db/schema/auth';
 import { eq } from 'drizzle-orm';
 import { BcryptService } from '@/src/lib/bcrypt.service';
 import { jwtService } from './jwt.service';
 import { generateRandomString } from './generation.service';
-import 'dotenv/config';
 
 interface LoginBody {
     email: string;
@@ -24,12 +25,24 @@ interface LoginResponse {
     refreshToken?: string;
     sessionId?: string;
 }
+/**
+ * since the db/schemaindex.ts has our schema aggregation and drizzle initialization (contructor), which enables relational queries, 
+ * we can directly use the drizzle instance here without initializing it again here (or in any other service file). 
+ * For example, to access tables dynamically through the db client using relations
+ * const user = await db.query.userTable.findFirst({where: (users, { eq }) => eq)users.email, email})
+ * const user is defined here without the [] because we use Relational Query API (db.query.) not the SQL-Like API (db.select().from().where()). 
+ * This RQ API fetches a sinle record or return undefined if none is found, unlike the SQL-Like API that would return an empty array.
+*/
 
 export const AuthService = {
     //1. SIGN UP (Write)
-    async signUp(newUser: NewUser): Promise<LoginResponse> {
-        //Find user
-        const [existingUser] = await db.select().from(usersTable).where(eq(usersTable.email, newUser.email));
+    //Omit<NewUser>, 'id'> informs TypeScript that the caller does not need to provide the 'id', as the service handles generating and appending the 'id' dynamically.
+    signUp: async (newUser: Omit<NewUser, 'id'>): Promise<LoginResponse> => {
+        //Find user - SQL-Like API is used here, so, db.select() will return an array, hence [ ] (de-structuring) is used to extract the first element.
+        const [existingUser] = await db
+            .select()
+            .from(usersTable)
+            .where(eq(usersTable.email, newUser.email))
 
         //check if user already exists
         if (existingUser) {
@@ -55,10 +68,13 @@ export const AuthService = {
     },
 
     //2. LOGIN (Read & Verify)
-    async login(body: LoginBody): Promise<LoginResponse> {
+    login: async (body: LoginBody): Promise<LoginResponse> => {
         //Find users
-        const [userExists] = await db.select().from(usersTable).where(eq(usersTable.email, body.email)).execute();
+        //const [userExists] = await db.select().from(usersTable).where(eq(usersTable.email, body.email)).execute();
 
+        const userExists = await db.query.usersTable.findFirst({
+            where: (users, { eq }) => eq(users.email, body.email)
+        })
         //check if user exists
         if (!userExists) {
             throw new Error('Invalid email or password');
@@ -103,7 +119,7 @@ export const AuthService = {
     },
 
     //3. LOGOUT (Revocation)
-    async logout(sessionId: string) {
+    logout: async (sessionId: string) => {
         await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
         return { success: true };
     }
