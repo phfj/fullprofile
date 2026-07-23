@@ -1,4 +1,4 @@
-'use server' //tells next.js that this file will be executed on the server (in Node.js runtime), not in the browser
+//'use server' //tells next.js that this file will be executed on the server (in Node.js runtime), not in the browser
 
 //sqlite auth-service logic
 import crypto from 'crypto';
@@ -95,7 +95,7 @@ export const AuthService = {
             id: sessionId,
             userId: userExists.id,
             createdAt: new Date().toISOString(),
-            expiresAt: new Date().toISOString()
+            expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString() //set in the future
         });
 
         //Generate short-lived JWT for fast stateless API authentication

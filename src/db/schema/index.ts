@@ -3,11 +3,19 @@ import { drizzle } from 'drizzle-orm/libsql';
 import * as auth from './auth';
 import * as booking from './booking';
 import * as clinic from './clinic';
+import * as employees from './hr/employees';
+import * as paydetails from './payroll/paydetails';
+import * as payslips from './payroll/payslips';
+import * as timesheets from './timeandattendance/timesheets';
 
 export const schema = {
     ...auth,
     ...booking,
     ...clinic,
+    ...employees,
+    ...paydetails,
+    ...payslips,
+    ...timesheets,
 };
 
 const dbFileName = process.env.DATABASE_URL;
